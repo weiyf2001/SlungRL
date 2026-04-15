@@ -55,29 +55,31 @@ class EnvRandomizer(object):
 
     def randomize_env(self, model):
         model = self.reset_env(model=model)
-        
-        for i in range(self.nbody):
-            if self.has_payload and not i == self.payload_body_id:
-                model.body_ipos[i] = self._default_body_ipos[i] + uniform(size=3, low=-self.ipos_noise_scale, high=self.ipos_noise_scale)
-                body_iquat = random_deviation_quaternion(self._default_body_iquat[i], self.iquat_noise_scale)
-                model.body_iquat[i] = body_iquat / norm(body_iquat)  # normalize quaternion
-                model.body_mass[i] = self._default_body_mass[i] * (1.0 + uniform(low=-self.mass_noise_scale, high=self.mass_noise_scale))
-                model.body_inertia[i] = self._default_body_inertia[i] * (1.0 + uniform(size=3, low=-self.inertia_noise_scale, high=self.inertia_noise_scale))
-        
-        for gear in model.actuator_gear:
-            gear *= 1.0 + uniform(low=-self.actuator_gear_noise_scale, high=self.actuator_gear_noise_scale, size=len(gear))
+        payload_mass = self._default_payload_mass
+        tendon_length = self._default_tendon_max_length
+        # for i in range(self.nbody):
+        #     if self.has_payload and not i == self.payload_body_id:
+        #         model.body_ipos[i] = self._default_body_ipos[i] + uniform(size=3, low=-self.ipos_noise_scale, high=self.ipos_noise_scale)
+        #         body_iquat = random_deviation_quaternion(self._default_body_iquat[i], self.iquat_noise_scale)
+        #         model.body_iquat[i] = body_iquat / norm(body_iquat)  # normalize quaternion
+        #         model.body_mass[i] = self._default_body_mass[i] * (1.0 + uniform(low=-self.mass_noise_scale, high=self.mass_noise_scale))
+        #         model.body_inertia[i] = self._default_body_inertia[i] * (1.0 + uniform(size=3, low=-self.inertia_noise_scale, high=self.inertia_noise_scale))
+
+        # for gear in model.actuator_gear:
+        #     gear *= 1.0 + uniform(low=-self.actuator_gear_noise_scale, high=self.actuator_gear_noise_scale, size=len(gear))
         
         if self.has_payload:
-            payload_mass = self._default_body_mass[self.payload_body_id] * uniform(low=0, high=self.payload_mass_scale)
-            tendon_length = uniform(low=0, high=1)
-            payload_mass = 0.1
-            tendon_length = 0.5
+            payload_mass = self._default_body_mass[self.payload_body_id] * uniform(low=0.5, high=self.payload_mass_scale)
+            # tendon_length = uniform(low=0.5, high=1)
+            tendon_length = uniform(low=0.5, high=2)
+            # payload_mass = 0.1
+            # tendon_length = 0.5
             model.body_ipos[self.payload_body_id] = self._default_hook_core_site_pos + np.array([0, 0, -tendon_length])
             model.body_mass[self.payload_body_id] = payload_mass
             model.tendon_range[0][1] = tendon_length
 
-        tau_up = self._default_tau_up * 0.05  # * uniform(0.05, 0.2)
-        tau_down = self._default_tau_down * 0.05  # * uniform(0.05, 0.2)
+        tau_up = self._default_tau_up * 1  # * uniform(0.05, 0.2)
+        tau_down = self._default_tau_down * 1  # * uniform(0.05, 0.2)
 
         # print("body_ipos: \n", model.body_ipos)
         # print("body_iquat: \n", model.body_iquat)

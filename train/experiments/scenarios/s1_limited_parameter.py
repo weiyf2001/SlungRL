@@ -29,7 +29,7 @@ class QuadrotorPayloadEnvS1LimitedParameter(QuadrotorPayloadEnvV2):
         self._defer_env_init_log = True
         super().__init__(*args, **kwargs)
         self.is_io_history = observation_mode == "history"
-        self.is_env_randomized = True
+        self.is_env_randomized = False
         self.is_disturbance = False
         self.is_full_traj = False
         self.is_rotor_dynamics = False
